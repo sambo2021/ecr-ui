@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECR Repositories</title>
+    <style>
+        /* Basic Reset */
+        body, h1, p {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Fixed header styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(45deg, #B0BEC5, #90A4AE); /* Soft grey-blue gradient */
+            color: black; /* All text in header is black */
+            padding: 20px 40px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1em;
+        }
+
+        /* Title Styling */
+        .header h2 {
+            margin: 0;
+            text-align: center;
+            font-weight: 600;
+            flex: 1;
+            font-size: 1.5em;
+        }
+
+        /* Header details */
+        .header .details {
+            display: flex;
+            justify-content: space-between;
+            width: 50%;
+            font-size: 1em;
+            font-weight: 400;
+            color: black; /* Text in header details is black */
+        }
+
+        .header .details p {
+            margin: 5px 0;
+        }
+
+        .header .details strong {
+            color: black; /* Strong text in header details is black */
+        }
+
+        /* Contact info styling */
+        .header .contact-info {
+            font-size: 0.9em;
+            color: black; /* Contact info text is black */
+        }
+
+        /* Body background and styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding-top: 120px; /* Ensure content isn't hidden behind the header */
+            background-color: #ECEFF1; /* Soft light grey background */
+            color: black; /* All text in body is black */
+        }
+
+        h1 {
+            text-align: center;
+            color: black; /* Black color for the main heading */
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #B0BEC5;
+            border-radius: 5px;
+            background-color: #FFFFFF; /* White background for list items */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        li strong {
+            color: black; /* Black color for clickable items */
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            margin-top: 10px;
+            padding-left: 20px;
+            border-left: 2px solid #B0BEC5;
+            background-color: #F5F5F5; /* Light grey background for dropdown */
+        }
+
+        .dropdown-content.visible {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #B0BEC5;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #CFD8DC; /* Light grey for table headers */
+            color: black; /* Table headers text is black */
+        }
+
+        td {
+            background-color: #FFFFFF;
+            color: black; /* Table cell text is black */
+        }
+
+        .dropdown-content strong {
+            display: block;
+            color: black; /* Text in dropdown content is black */
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Fixed Header -->
+    <div class="header">
+        <div class="details">
+            <p><strong>Created By Team:</strong> Team XYZ</p>
+            <p class="contact-info"><strong>Contact Info:</strong> contact@teamxyz.com</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <h1>ECR Repositories</h1>
+    <ul>
+        {% for key, values in repositories.items() %}
+        <li>
+            <strong onclick="toggleDropdown(this)">{{ key }}</strong>
+            <div class="dropdown-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tags</th>
+                            <th>Digest</th>
+                            <th>Creation Date</th>
+                            <th>Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for value in values %}
+                        <tr>
+                            <td>{{ value['imageTags'] | default('N/A') }}</td>
+                            <td>{{ value['imageDigest'] | default('N/A') }}</td>
+                            <td><span class="time" data-time="{{ value['imagePushedAt'] }}"></span></td>
+                            <td><span class="size" data-size="{{ value['imageSizeInBytes'] }}"></span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        // Function to convert size from bytes to MB with 1 decimal place
+        function convertSizeToMB(sizeInBytes) {
+            if (sizeInBytes > 0) {
+                return (sizeInBytes / (1024 * 1024)).toFixed(1) + " MB";
+            }
+            return "N/A"; // Return "N/A" if no size is available
+        }
+
+        // Function to format ISO 8601 timestamp to 'YYYY-MM-DD HH:MM:SS'
+        function formatDate(isoDate) {
+            const date = new Date(isoDate);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // Iterate over all size elements and convert the data-size attribute
+        document.querySelectorAll('.size').forEach(function(element) {
+            const sizeInBytes = parseInt(element.getAttribute('data-size'));
+            element.textContent = convertSizeToMB(sizeInBytes);
+        });
+
+        // Iterate over all time elements and format the timestamp
+        document.querySelectorAll('.time').forEach(function(element) {
+            const isoDate = element.getAttribute('data-time');
+            element.textContent = formatDate(isoDate);
+        });
+
+        // Toggle dropdown visibility
+        function toggleDropdown(element) {
+            const dropdownContent = element.nextElementSibling;
+            dropdownContent.classList.toggle('visible');
+        }
+    </script>
+</body>
+</html>

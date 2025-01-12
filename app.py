@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
 import boto3
+import os
 from botocore.exceptions import BotoCoreError, NoCredentialsError
 import datetime
 
@@ -9,7 +10,7 @@ app = FastAPI()
 templates= Jinja2Templates(directory="templates")
 ecr_client = boto3.client('ecr')
 
-registry_id="REPLACE_ME"
+registry_id = os.environ.get("REGISTRY_ID")
 
 @app.get('/',response_class=HTMLResponse)
 def ecr_repos(request: Request ):
